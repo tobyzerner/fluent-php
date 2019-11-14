@@ -1,0 +1,23 @@
+{
+    "name": "tobyz/fluent-php",
+    "require": {
+        "php": "^7.3",
+        "ext-intl": "*",
+        "ext-json": "*"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Toby Zerner",
+            "email": "toby.zerner@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Tobyz\\Fluent\\": "src/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
