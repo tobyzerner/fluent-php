@@ -9,16 +9,16 @@ class Parser
 {
     // This regex is used to iterate through the beginnings of messages and terms.
     // With the /m flag, the ^ matches at the beginning of every line.
-    const RE_MESSAGE_START = '/^(-?[a-zA-Z][\w-]*) *= */m'; // global
+    const RE_MESSAGE_START = '/^(-?[a-zA-Z][\w-]*) *= */m';
 
     // Both Attributes and Variants are parsed in while loops. These regexes are
     // used to break out of them.
-    const RE_ATTRIBUTE_START = '/\.([a-zA-Z][\w-]*) *= */A'; // sticky
-    const RE_VARIANT_START = '/\*?\[/A'; // sticky
+    const RE_ATTRIBUTE_START = '/\.([a-zA-Z][\w-]*) *= */A';
+    const RE_VARIANT_START = '/\*?\[/A';
 
-    const RE_NUMBER_LITERAL = '/(-?[0-9]+(?:\.([0-9]+))?)/A'; // sticky
-    const RE_IDENTIFIER = '/([a-zA-Z][\w-]*)/A'; // sticky
-    const RE_REFERENCE = '/([$-])?([a-zA-Z][\w-]*)(?:\.([a-zA-Z][\w-]*))?/A'; // sticky
+    const RE_NUMBER_LITERAL = '/(-?[0-9]+(?:\.([0-9]+))?)/A';
+    const RE_IDENTIFIER = '/([a-zA-Z][\w-]*)/A';
+    const RE_REFERENCE = '/([$-])?([a-zA-Z][\w-]*)(?:\.([a-zA-Z][\w-]*))?/A';
     const RE_FUNCTION_NAME = '/^[A-Z][A-Z0-9_-]*$/A';
 
     // A "run" is a sequence of text or string literal characters which don't
@@ -27,12 +27,12 @@ class Parser
     // if the next line is indented. For StringLiterals they are: \ (starts an
     // escape sequence), " (ends the literal), and line breaks which are not allowed
     // in StringLiterals. Note that string runs may be empty; text runs may not.
-    const RE_TEXT_RUN = '/([^{}\n\r]+)/A'; // sticky
-    const RE_STRING_RUN = '/([^\\"\n\r]*)/A'; // sticky
+    const RE_TEXT_RUN = '/([^{}\n\r]+)/A';
+    const RE_STRING_RUN = '/([^\\"\n\r]*)/A';
 
     // Escape sequences.
-    const RE_STRING_ESCAPE = '/\\([\\"])/A'; // sticky
-    const RE_UNICODE_ESCAPE = '/\\u([a-fA-F0-9]{4})|\\U([a-fA-F0-9]{6})/A'; // sticky
+    const RE_STRING_ESCAPE = '/\\([\\"])/A';
+    const RE_UNICODE_ESCAPE = '/\\u([a-fA-F0-9]{4})|\\U([a-fA-F0-9]{6})/A';
 
     // Used for trimming TextElements and indents.
     const RE_LEADING_NEWLINES = '/^\n+/';
@@ -43,17 +43,17 @@ class Parser
     const RE_INDENT = '/( *)$/';
 
     // Common tokens.
-    const TOKEN_BRACE_OPEN = '/{\s*/A'; // sticky
-    const TOKEN_BRACE_CLOSE = '/\s*}/A'; // sticky
-    const TOKEN_BRACKET_OPEN = '/\[\s*/A'; // sticky
-    const TOKEN_BRACKET_CLOSE = '/\s*] */A'; // sticky
-    const TOKEN_PAREN_OPEN = '/\s*\(\s*/A'; // sticky
-    const TOKEN_ARROW = '/\s*->\s*/A'; // sticky
-    const TOKEN_COLON = '/\s*:\s*/A'; // sticky
+    const TOKEN_BRACE_OPEN = '/{\s*/A';
+    const TOKEN_BRACE_CLOSE = '/\s*}/A';
+    const TOKEN_BRACKET_OPEN = '/\[\s*/A';
+    const TOKEN_BRACKET_CLOSE = '/\s*] */A';
+    const TOKEN_PAREN_OPEN = '/\s*\(\s*/A';
+    const TOKEN_ARROW = '/\s*->\s*/A';
+    const TOKEN_COLON = '/\s*:\s*/A';
     // Note the optional comma. As a deviation from the Fluent EBNF, the parser
     // doesn't enforce commas between call arguments.
-    const TOKEN_COMMA = '/\s*,?\s*/A'; // sticky
-    const TOKEN_BLANK = '/\s+/A'; // sticky
+    const TOKEN_COMMA = '/\s*,?\s*/A';
+    const TOKEN_BLANK = '/\s+/A';
 
     // Maximum number of placeables in a single Pattern to protect against Quadratic
     // Blowup attacks. See https://msdn.microsoft.com/en-us/magazine/ee335713.aspx.
