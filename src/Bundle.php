@@ -35,12 +35,12 @@ class Bundle
         return isset($this->messages[$id]);
     }
 
-    public function getMessage(string $id)
+    public function getMessage(string $id): ?array
     {
         return $this->messages[$id] ?? null;
     }
 
-    public function addResource(Resource $res, array $options = [])
+    public function addResource(Resource $res, array $options = []): array
     {
         $allowOverrides = $options['allowOverrides'] ?? false;
         $errors = [];
@@ -68,7 +68,7 @@ class Bundle
         return $errors;
     }
 
-    public function formatPattern($pattern, array $args = [], array &$errors = null)
+    public function formatPattern($pattern, array $args = [], array &$errors = null): string
     {
         // Resolve a simple pattern without creating a scope. No error handling is
         // required; by definition simple patterns don't have placeables.
