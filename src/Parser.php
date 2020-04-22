@@ -55,10 +55,6 @@ class Parser
     const TOKEN_COMMA = '/\s*,?\s*/A';
     const TOKEN_BLANK = '/\s+/A';
 
-    // Maximum number of placeables in a single Pattern to protect against Quadratic
-    // Blowup attacks. See https://msdn.microsoft.com/en-us/magazine/ee335713.aspx.
-    const MAX_PLACEABLES = 100;
-
     private $source;
     private $cursor = 0;
 
@@ -220,8 +216,6 @@ class Parser
      */
     private function parsePatternElements($elements, $commonIndent)
     {
-        $placeableCount = 0;
-
         while (true) {
             if ($this->test(static::RE_TEXT_RUN)) {
                 $elements[] = $this->match1(static::RE_TEXT_RUN);
@@ -229,10 +223,6 @@ class Parser
             }
 
             if ($this->source[$this->cursor] === "{") {
-                if (++$placeableCount > static::MAX_PLACEABLES) {
-                    throw new FluentException("Too many placeables");
-                }
-
                 $elements[] = $this->parsePlaceable();
                 continue;
             }

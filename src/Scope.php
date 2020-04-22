@@ -14,25 +14,25 @@ class Scope
     /** A dict of developer-provided variables. */
     public $args;
 
-    /** Term references require different variable lookup logic. */
-    public $insideTermReference;
-
     /** The Set of patterns already encountered during this resolution.
      * Used to detect and prevent cyclic resolutions. */
-    public $dirty;
+    public $dirty = [];
+
+    /** A dict of parameters passed to a TermReference. */
+    public $params;
+
+    /** The running count of placeables resolved so far. Used to detect the
+     * Billion Laughs and Quadratic Blowup attacks. */
+    public $placeables = 0;
 
     public function __construct(
         Bundle $bundle,
         array &$errors = null,
-        array $args = [],
-        bool $insideTermReference = false,
-        array $dirty = []
+        array $args = []
     ) {
         $this->bundle = $bundle;
         $this->errors = &$errors;
         $this->args = $args;
-        $this->insideTermReference = $insideTermReference;
-        $this->dirty = $dirty;
     }
 
     public function cloneForTermReference(array $args)

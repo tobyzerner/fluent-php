@@ -33,8 +33,10 @@ use DateTime;
 
 class Resolver
 {
-    // Prevent expansion of too long placeables.
-    const MAX_PLACEABLE_LENGTH = 2500;
+    // The maximum number of placeables which can be expanded in a single call to
+    // `formatPattern`. The limit protects against the Billion Laughs and Quadratic
+    // Blowup attacks. See https://msdn.microsoft.com/en-us/magazine/ee335713.aspx.
+    const MAX_PLACEABLES = 100;
 
     // Unicode bidi isolation characters.
     const FSI = "\u{2068}";
@@ -98,7 +100,7 @@ class Resolver
             }
         }
 
-        return [$positional, $named];
+        return compact('positional', 'named');
     }
 
     /**
@@ -135,14 +137,23 @@ class Resolver
     {
         $name = $expr['name'];
 
-        if (! isset($scope->args[$name])) {
-            if ($scope->insideTermReference === false) {
-                $scope->reportError(new RuntimeException("Unknown variable: $name"));
+        $arg = null;
+
+        if ($scope->params) {
+            // We're inside a TermReference. It's OK to reference undefined parameters.
+            if (isset($scope->params[$name])) {
+                $arg = $scope->params[$name];
+            } else {
+                return new Types\None($name);
             }
+        } elseif (isset($scope->args[$name])) {
+            // We're in the top-level Pattern or inside a MessageReference. Missing
+            // variables references produce ReferenceErrors.
+            $arg = $scope->args[$name];
+        } else {
+            $scope->reportError(new RuntimeException("Unknown variable: $name"));
             return new Types\None($name);
         }
-
-        $arg = $scope->args[$name];
 
         // Return early if the argument already is an instance of FluentType.
         if ($arg instanceof Types\Type || is_string($arg)) {
@@ -211,20 +222,23 @@ class Resolver
             return new Types\None($id);
         }
 
-        // Every TermReference has its own variables.
-        [, $params] = static::getArguments($scope, $args);
-        $local = $scope->cloneForTermReference($params);
-
         if ($attr) {
             $attribute = $term['attributes'][$attr] ?? null;
             if ($attribute) {
-                return static::resolvePattern($local, $attribute);
+                // Every TermReference has its own variables.
+                $scope->params = static::getArguments($scope, $args)['named'];
+                $resolved = static::resolvePattern($scope, $attribute);
+                $scope->params = null;
+                return $resolved;
             }
             $scope->reportError(new RuntimeException("Unknown attribute: $attr"));
             return new Types\None("$id.$attr");
         }
 
-        return static::resolvePattern($local, $term['value']);
+        $scope->params = static::getArguments($scope, $args)['named'];
+        $resolved = static::resolvePattern($scope, $term['value']);
+        $scope->params = null;
+        return $resolved;
     }
 
     /**
@@ -249,7 +263,8 @@ class Resolver
         }
 
         try {
-            return $func(...static::getArguments($scope, $args));
+            $resolved = static::getArguments($scope, $args);
+            return $func($resolved['positional'], $resolved['name']);
         } catch (Exception $e) {
             $scope->reportError($e);
             return new Types\None("$name()");
@@ -302,14 +317,8 @@ class Resolver
                 continue;
             }
 
-            $value = static::resolveExpression($scope, $elem);
-            $part = is_string($value) ? $value : $value->toString($scope);
-
-            if ($useIsolating) {
-                $result[] = static::FSI;
-            }
-
-            if (strlen($part) > static::MAX_PLACEABLE_LENGTH) {
+            $scope->placeables++;
+            if ($scope->placeables > static::MAX_PLACEABLES) {
                 $scope->dirty = array_filter($scope->dirty, function ($val) use ($ptn) {
                     return $val !== $ptn;
                 });
@@ -319,12 +328,17 @@ class Resolver
                 // usage, and throwing protects against eating up the CPU when long
                 // placeables are deeply nested.
                 throw new RangeException(
-                    "Too many characters in placeable " .
-                    "(".strlen($part).", max allowed is ".static::MAX_PLACEABLE_LENGTH
+                    "Too many placeables expanded: {$scope->placeables}, ".
+                    "max allowed is ".static::MAX_PLACEABLES
                 );
             }
 
-            $result[] = $part;
+            if ($useIsolating) {
+                $result[] = static::FSI;
+            }
+
+            $value = static::resolveExpression($scope, $elem);
+            $result[] = is_string($value) ? $value : $value->toString($scope);
 
             if ($useIsolating) {
                 $result[] = static::PDI;
