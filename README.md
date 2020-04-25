@@ -6,10 +6,11 @@
 This library is a PHP implementation of [Project Fluent][], a localization
 framework designed to unleash the expressive power of the natural language.
 
-It is a simple port of the official JavaScript [@fluent/bundle][] package with a very similar API and source code architecture.
+It is a simple port of the official JavaScript [@fluent/bundle][] package with a very similar API and source code architecture. It also includes an overlay utility based on [@fluent/dom][] to allow HTML strings to be translated.
 
 [Project Fluent]: https://projectfluent.org
 [@fluent/bundle]: https://github.com/projectfluent/fluent.js/tree/master/fluent-bundle
+[@fluent/dom]: https://github.com/projectfluent/fluent.js/tree/master/fluent-dom
 
 
 ## Installation
@@ -22,6 +23,7 @@ It is a simple port of the official JavaScript [@fluent/bundle][] package with a
 ```php
 use Tobyz\Fluent\Bundle;
 use Tobyz\Fluent\Resource;
+use Tobyz\Fluent\Overlay;
 
 $resource = new Resource('
 -brand-name = Foo 3000
@@ -39,6 +41,17 @@ if ($welcome) {
     $bundle->formatPattern($welcome['value'], ['name' => 'Anna']);
     // → "Welcome, Anna, to Foo 3000!"
 }
+
+// Overlay translations and attributes onto HTML
+// See https://github.com/projectfluent/fluent.js/wiki/DOM-Overlays
+Overlay::translateHtml(
+    '<p><img data-l10n-name="world" src="world.png"></p>',
+    [
+        'value' => 'Hello, <img data-l10n-name="world" alt="world">!', 
+        'attributes' => ['title' => 'Hello']
+    ]
+);
+// → <p title="Hello">Hello, <img data-l10n-name="world" alt="world" src="world.png">!</p>
 ```
 
 
