@@ -3,6 +3,9 @@
 [travisimage]: https://travis-ci.org/tobyz/fluent-php.svg?branch=master
 [travislink]: https://travis-ci.org/tobyz/fluent-php
 
+> [!WARNING]  
+> The project is no longer maintained. Use [jrmajor/fluent-php](https://github.com/jrmajor/fluent-php) instead.
+
 This library is a PHP implementation of [Project Fluent][], a localization
 framework designed to unleash the expressive power of the natural language.
 
